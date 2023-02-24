@@ -3,7 +3,7 @@ import re
 
 new_spread = re.compile("^\d+$")
 
-def clean_subs(path):
+def read_subs(path):
     with open(path) as f:
         last_line_a_number = False
         for line in f:
@@ -15,9 +15,22 @@ def clean_subs(path):
             elif not clean_line:
                 pass
             else:
-                print(re.sub('<[^<]+?>', '', clean_line))
+                yield re.sub('<[^<]+?>', '', clean_line).strip()
+
+
+def clean_subs(path):
+    line_so_far = None
+    for line in read_subs(path):
+        if not line_so_far:
+            line_so_far = line
+        else:
+            line_so_far = " ".join([line_so_far, line])
+        if re.search("[.!?]”?$", line):
+            yield line_so_far
+            line_so_far = None
 
 
 if __name__ == "__main__":
-    clean_subs(sys.argv[1])
-  
+    srt = sys.argv[1]
+    for line in clean_subs(sys.argv[1]):
+        print(line)
